@@ -1,5 +1,26 @@
 # Cloudflare Pages Deployment Guide
 
+## Quick Start (One Command)
+
+```bash
+git clone https://github.com/naoufac/coda.git && cd coda
+
+export CF_API_TOKEN="your-cloudflare-api-token"
+export CF_ACCOUNT_ID="your-cloudflare-account-id"
+
+bash deploy-all.sh
+```
+
+This single command creates 5 Git branches, pushes them, creates 5 Cloudflare Pages projects, attaches 9 custom domains, and configures 5 redirect rules. Done.
+
+You can also run the parts separately:
+```bash
+bash deploy-all.sh --branches-only     # Just create & push Git branches
+bash deploy-all.sh --cloudflare-only   # Just configure Cloudflare via API
+```
+
+---
+
 ## Overview
 
 This repo contains 5 separate landing pages, each deployed as an independent Cloudflare Pages project from its own Git branch. Any push to a branch triggers an automatic redeploy of its corresponding landing page.
