@@ -18,6 +18,16 @@ This repo contains 5 separate landing pages, each deployed as an independent Clo
 
 ## Step 1: Create Branches & Push
 
+### Option A: Automatic via GitHub Actions (Recommended)
+
+The repo includes a GitHub Actions workflow (`.github/workflows/deploy-branches.yml`) that automatically creates and pushes all 5 landing page branches when:
+- Changes are pushed to `main` in the `landing-pages/` directory
+- The workflow is manually triggered (Actions → Deploy Landing Page Branches → Run workflow)
+
+This runs automatically — no manual steps needed once the workflow is merged to `main`.
+
+### Option B: Manual
+
 ```bash
 # Clone the repo
 git clone <repo-url>
@@ -32,7 +42,35 @@ git push origin lp-plumbing lp-hvac lp-fire-protection lp-mexico lp-europe
 
 ---
 
-## Step 2: Create Cloudflare Pages Projects
+## Step 2: Create Cloudflare Pages Projects + Domains + Redirects
+
+### Option A: Automated via API Script (Recommended)
+
+Run the `cloudflare-setup.sh` script to create all 5 Pages projects, attach domains, and configure 301 redirects in one go:
+
+```bash
+# Set your Cloudflare credentials
+export CF_API_TOKEN="your-api-token"    # Create at: Cloudflare → My Profile → API Tokens
+export CF_ACCOUNT_ID="your-account-id"  # Found at: Cloudflare → any domain → Overview → sidebar
+export GITHUB_REPO_OWNER="naoufac"
+export GITHUB_REPO_NAME="coda"
+
+# Run the setup
+bash cloudflare-setup.sh
+```
+
+The API token needs these permissions:
+- **Account** > Cloudflare Pages > Edit
+- **Zone** > Zone > Read
+- **Zone** > DNS > Edit
+- **Zone** > Page Rules / Rules > Edit
+
+This will:
+- Create 5 Cloudflare Pages projects connected to this repo
+- Attach all 9 custom domains to the correct projects
+- Set up 301 redirects for 5 domains → codaresources-vietnam.com
+
+### Option B: Manual via Dashboard
 
 For **each** of the 5 branches, create a new Cloudflare Pages project:
 
