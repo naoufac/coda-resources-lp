@@ -1,0 +1,74 @@
+name: Deploy Landing Page Branches
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'landing-pages/**'
+
+permissions:
+  contents: write
+
+jobs:
+  create-branches:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch:
+          - name: lp-plumbing
+            dir: lp-plumbing
+          - name: lp-hvac
+            dir: lp-hvac
+          - name: lp-fire-protection
+            dir: lp-fire-protection
+          - name: lp-mexico
+            dir: lp-mexico
+          - name: lp-europe
+            dir: lp-europe
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push ${{ matrix.branch.name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="${{ matrix.branch.name }}"
+          DIR="${{ matrix.branch.dir }}"
+
+          echo "Creating orphan branch: $BRANCH from landing-pages/$DIR"
+
+          # Create orphan branch
+          git checkout --orphan "$BRANCH"
+
+          # Remove everything from index
+          git rm -rf --cached . > /dev/null 2>&1 || true
+
+          # Clean working directory except .git and landing-pages
+          find . -maxdepth 1 ! -name '.git' ! -name 'landing-pages' ! -name '.' -exec rm -rf {} +
+
+          # Copy LP files to root
+          cp -r "landing-pages/$DIR"/* .
+
+          # Remove landing-pages directory
+          rm -rf landing-pages
+
+          # Add .gitignore
+          printf '.DS_Store\n*.swp\n.env\n' > .gitignore
+
+          # Commit
+          git add -A
+          git commit -m "Deploy: $BRANCH landing page
+
+          Auto-deployed from landing-pages/$DIR
+          Entry point: index.html"
+
+          # Force push (orphan branch replaces any existing)
+          git push origin "$BRANCH" --force
+
+          echo "✅ Branch $BRANCH pushed successfully"
